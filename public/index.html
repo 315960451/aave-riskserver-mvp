@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aave 风控查询器</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        input { width: 70%; padding: 10px; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #007bff; color: white; border: none; }
+        button:disabled { background: #ccc; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #ddd; display: none; }
+        .risk { color: orange; font-weight: bold; }
+        .liquidation { color: red; font-weight: bold; }
+        .safe { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🏦 Aave V3 风险监视器</h1>
+    <p>输入以太坊钱包地址，查询风控状况</p>
+    
+    <div>
+        <input type="text" id="addressInput" placeholder="输入 0x 开头的地址..." value="0xC4668E8c8b5CB6f043d1D5f147C6E2c75556455C" />
+        <button onclick="checkRisk()" id="btn">查询</button>
+    </div>
+
+    <div id="result">
+        <p>总抵押: <span id="collateral"></span> USD</p>
+        <p>总债务: <span id="debt"></span> USD</p>
+        <p>健康因子: <span id="hf"></span></p>
+        <p>状态: <span id="status"></span></p>
+    </div>
+
+    <script>
+        async function checkRisk() {
+            const address = document.getElementById('addressInput').value;
+            const btn = document.getElementById('btn');
+            const resultDiv = document.getElementById('result');
+            
+            if (!address) return alert("请输入地址");
+
+            btn.disabled = true;
+            btn.innerText = "查询中...";
+            resultDiv.style.display = "none";
+
+            try {
+                // 为了简单演示，只运行刚才的 server.ts 接口
+                
+                // 注意：这里是调用本地测试，部署后看第三阶段
+                const response = await fetch(`/api/risk?address=${address}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("出错: " + data.error);
+                } else {
+                    document.getElementById('collateral').innerText = data.totalCollateralUSD;
+                    document.getElementById('debt').innerText = data.totalDebtUSD;
+                    document.getElementById('hf').innerText = data.healthFactor;
+                    
+                    const statusSpan = document.getElementById('status');
+                    statusSpan.innerText = data.riskStatus.toUpperCase();
+                    statusSpan.className = data.riskStatus;
+                    
+                    resultDiv.style.display = "block";
+                }
+            } catch (e) {
+                alert("网络请求失败");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "查询";
+            }
+        }
+    </script>
+</body>
+</html>
