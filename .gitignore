@@ -1,0 +1,11 @@
+# 忽略依赖包 (体积巨大，不需要传，别人用 npm install 就能装)
+node_modules/
+
+# 忽略系统文件
+.DS_Store
+
+# 🚨 忽略环境变量文件 (保护你的 Key)
+.env
+
+# 忽略编译后的 JS 文件 (如果你用 tsc 编译的话)
+dist/
